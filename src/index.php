@@ -3,8 +3,15 @@
 	
 	use DateTime;
 	use DOMDocument;
+	use Exception;
 	
 	require "classes/Episode.php";
+	/** @var string $login_url */
+	/** @var string $feed_url */
+	/** @var string $email */
+	/** @var string $password */
+	/** @var string $cache_url */
+	/** @var string $fixed_feed_url */
 	require "settings.php";
 	
 	function secho(string $text) {
@@ -96,7 +103,7 @@
 			$pubDate = new DateTime($pubDay);
 			// Wed, 23 Dec 2020 04:21:41 +0000
 			$pubDateString = $pubDate->format("D, j M Y h:i:s +0000");
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			$pubDateString = "Mon, 1 Jan 2000 00:00:00 +0000";
 		}
 		
@@ -160,6 +167,7 @@
 	}
 	
 	$feed = str_replace("{{{ITEMS}}}", $items, $feed);
+	$feed = str_replace("{{{FEED_LOCATION}}}", $fixed_feed_url, $feed);
 	file_put_contents("tmp/current_feed.xml", $feed);
 	secho("new feed created. closing");
 	curl_close($curl);
