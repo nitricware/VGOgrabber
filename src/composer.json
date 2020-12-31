@@ -1,0 +1,17 @@
+{
+  "name": "NitricWare/VGOGrabber",
+  "description": "displays VGO premium feed",
+  "minimum-stability": "stable",
+  "license": "BSD",
+  "authors": [
+    {
+      "name": "nitricware",
+      "email": "office@nitricware.com"
+    }
+  ],
+  "require": {
+    "ext-curl": "*",
+    "ext-dom": "*",
+    "ext-simplexml": "*"
+  }
+}
