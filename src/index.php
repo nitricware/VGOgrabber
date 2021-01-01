@@ -13,6 +13,9 @@
 	/** @var string $cache_url */
 	/** @var string $fixed_feed_url */
 	require "settings.php";
+	require "classes/VGOGrabber.php";
+	
+	$grabber = new VGOGrabber();
 	
 	function secho(string $text) {
 		echo $text."<br />";
@@ -20,30 +23,22 @@
 	
 	secho("VGO Grabber v1.0");
 	
-	$curl = curl_init();
-	curl_setopt($curl, CURLOPT_URL, $login_url);
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($curl, CURLOPT_POST, 1);
-	curl_setopt(
-		$curl,
-		CURLOPT_POSTFIELDS,
-		"email=$email&password=$password&submit=true"
-	);
-	curl_setopt($curl, CURLOPT_COOKIEJAR, '/tmp/cookies.txt');
-	curl_setopt($curl, CURLOPT_COOKIEFILE, '/tmp/cookies.txt');
+	try {
+		$grabber->libsynLogin($email, $password);
+	} catch (Exception $e) {
+		secho ("Unexpected Error...");
+	}
 	
-	/**
-	 * first, log in
-	 */
-	curl_exec($curl);
+	//TODO implement check for unsuccessful login
 	
 	secho("login done.");
 	
-	curl_setopt($curl, CURLOPT_URL, $feed_url);
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($curl, CURLOPT_POST, 0);
-	
-	$episodesHTML = curl_exec($curl);
+	try {
+		$episodesHTML = $grabber->fetchVGOfeed();
+	} catch (Exception $e) {
+		secho ("Unexpected Error...");
+		exit();
+	}
 	
 	secho("got episode list html");
 	
@@ -64,18 +59,18 @@
 	
 	foreach ($episodes as $episode) {
 		secho("Element $i in episodes array - string procedure");
-		$episode->saveXML("tmp/test.xml");
 		
 		/**
 		 * load player
 		 */
 		$playerURL = "https:".(string)$episode->div[2]->iframe["src"];
 		
-		curl_setopt($curl, CURLOPT_URL, $playerURL);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_POST, 0);
-		
-		$player = curl_exec($curl);
+		try {
+			$player = $grabber->fetchPlayer($playerURL);
+		} catch (Exception $e) {
+			secho ("Unexpected Error...");
+			exit();
+		}
 		
 		$playerDOM = new DOMDocument();
 		@$playerDOM->loadHTML($player);
@@ -101,7 +96,6 @@
 		$pubDay = (string)trim($episode->div[1]);
 		try {
 			$pubDate = new DateTime($pubDay);
-			// Wed, 23 Dec 2020 04:21:41 +0000
 			$pubDateString = $pubDate->format("D, j M Y h:i:s +0000");
 		} catch (Exception $e) {
 			$pubDateString = "Mon, 1 Jan 2000 00:00:00 +0000";
@@ -125,24 +119,10 @@
 		$itemDummy = str_replace("{{{DIRECT_LINK}}}", $cache_url.$episodeObject->guid.".mp3", $itemDummy);
 		$itemDummy = str_replace("{{{DURATION}}}", $episodeObject->duration, $itemDummy);
 		
-		$files[] = $episodeObject->guid.".mp3";
-		if (!file_exists("podcasts/$episodeObject->guid.mp3")) {
-			if ($fileHandlers[$episodeObject->guid] = fopen("podcasts/$episodeObject->guid.mp3", 'wb+')) {
-				secho("file $episodeObject->guid.mp3 does not exist. downloading.");
-				curl_setopt($curl, CURLOPT_URL, $directLink);
-				curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-				curl_setopt($curl, CURLOPT_POST, 0);
-				curl_setopt($curl, CURLOPT_NOBODY, 0);
-				curl_setopt($curl, CURLOPT_TIMEOUT, 300);
-				curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-				curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 1);
-				curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-				curl_setopt($curl, CURLOPT_FILE, $fileHandlers[$episodeObject->guid]);
-				
-				curl_exec($curl);
-			}
-		} else {
-			secho("file $episodeObject->guid.mp3 does exits - skipping");
+		try {
+			$grabber->getPodcastFile($directLink, $episodeObject->guid);
+		} catch (Exception $e) {
+			secho("This episode was already downloaded. Skipping.");
 		}
 		
 		if ($i == 0) {
@@ -170,7 +150,7 @@
 	$feed = str_replace("{{{FEED_LOCATION}}}", $fixed_feed_url, $feed);
 	file_put_contents("tmp/current_feed.xml", $feed);
 	secho("new feed created. closing");
-	curl_close($curl);
+	
 	foreach ($fileHandlers as $fileHandler) {
 		fclose($fileHandler);
 	}
