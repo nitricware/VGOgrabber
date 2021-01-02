@@ -6,7 +6,7 @@ Downloads - if premium credentials are provided - up to 25 premium episodes from
 
 1. get VGO premium subscription
 2. get webspace with ~1GB storage and PHP 7.4 installed
-3. modify `settings.example.php` and save as `settings.php:
+3. modify `settings.example.php` and save as `settings.php`:
 ```php
 /**
  * $cache_url must be the url where your downloaded episodes
@@ -39,6 +39,10 @@ $password = "";
    `https://yourserver.com/pathWhereIndexIs/tmp/current_feed.xml`.
 7. manage access to the files by using a `.htaccess`file. Overcast can handle feeds behind such a mechanism with a neat UI. Apple Podcast should too by subscribing to:
    `https://htaccessUser:htaccessPassword@yourserver.com/pathWhereIndexIs/tmp/current_feed.xml`
+   
+## How it works
+`index.php` - when triggered - logs in to libsyn with the credentials provided in `settings.php` and the fetches the first page of the feed site (25 items). It then goes on to download those episodes and create a new RSS feed for apps like Overcast that contains all downloaded episodes.
+So it basically mirrors the complete VGO podcast feed on your personal webspace.
 
 ## Motivation
 
@@ -55,7 +59,8 @@ Feel free to message me on the VGO Discord. I'm `vcr80`.
 * 1.0 - initial release
 * 1.0.1 - fixed an issue that prevented Apple Podcasts to fetch the feed of VGOGrabber and made Apple Podcasts use the default VGO URL resulting in only showing non-premium content. Apps like Overcast did not have that problem.
 
-## Known Issues
+## Known Issues and Limitations
 
 - The code of `index.php` is ugly and should be split up into functions of `VGOGrabber` class.
 - No real error management
+- Game Store Guy and Community Show are not in the feed. I'm in contact with Michelle about that issue.
