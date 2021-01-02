@@ -5,6 +5,8 @@
 	
 	
 	use Exception;
+	use SimpleXMLElement;
+	use DOMDocument;
 	
 	class VGOGrabber {
 		/** @var \CurlHandle $curl */
@@ -13,7 +15,7 @@
 		private string $feedUrl = "https://vgo.libsyn.com/podcast";
 		
 		private array $fileHandlers = [];
-		/** @var string[] $files  */
+		/** @var string[] $files */
 		private array $files = [];
 		
 		public function __construct () {
@@ -25,8 +27,23 @@
 			curl_setopt($this->curl, CURLOPT_COOKIEFILE, '/tmp/cookies.txt');
 		}
 		
+		/**
+		 * Handles automatic clean-up
+		 */
 		public function __destruct () {
 			curl_close($this->curl);
+			foreach ($this->fileHandlers as $fileHandler) {
+				fclose($fileHandler);
+			}
+			
+			foreach (scandir("podcasts/") as $cachedFile) {
+				if ($cachedFile != "." && $cachedFile != "..") {
+					if (!in_array($cachedFile, $this->files)) {
+						secho("found $cachedFile which is an old episode. deleting.");
+						unlink("podcasts/$cachedFile");
+					}
+				}
+			}
 		}
 		
 		/**
@@ -115,6 +132,58 @@
 		 */
 		public function getPodcastFile (string $url, string $guid) {
 			$this->makeCURLrequest($url, false, false, $guid);
+		}
+		
+		/**
+		 * @param string $html
+		 *
+		 * @return SimpleXMLElement
+		 */
+		private function getSimpleXMLFromHTML (string $html): SimpleXMLElement {
+			$dom = new DOMDocument();
+			@$dom->loadHTML($html);
+			
+			return simplexml_import_dom($dom);
+			
+			//$episodes = $episodesXML->xpath("//div[@class='libsyn-item']");
+		}
+		
+		/**
+		 * @param SimpleXMLElement $xml
+		 * @param string           $query
+		 *
+		 * @return SimpleXMLElement[]
+		 */
+		private function findNodesWithXPath (SimpleXMLElement $xml, string $query) {
+			return $xml->xpath($query);
+		}
+		
+		/**
+		 * @param string $html
+		 *
+		 * @return SimpleXMLElement[]
+		 */
+		public function getEpisodeNodes (string $html) {
+			$xml = $this->getSimpleXMLFromHTML($html);
+			return $this->findNodesWithXPath($xml, "//div[@class='libsyn-item']");
+		}
+		
+		public function getEpisodeDuration (string $html) {
+			$xml = $this->getSimpleXMLFromHTML($html);
+			$xpath = $this->findNodesWithXPath($xml, "//span[@class='static-duration']");
+			return substr((string)$xpath[0], 2);
+		}
+		
+		public function getPlayerUrl (SimpleXMLElement $episode) {
+			return "https:" . (string)$episode->div[2]->iframe["src"];
+		}
+		
+		public function getDirectLink (string $html) {
+			// $re = '/"media_url":"([\w\d:\\\\\/\.\-]+)\?dest-id=([0-9]+)"/m';
+			$re = '/(traffic\.libsyn\.com[\\\\\/a-zA-Z0-9_\-.]+\.mp3)/m';
+			preg_match($re, $html, $matches);
+			$directLink = $matches[0];
+			return "https://" . str_replace("\/", "/", $directLink);
 		}
 		
 		/**

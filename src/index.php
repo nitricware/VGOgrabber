@@ -2,7 +2,6 @@
 	namespace NitricWare;
 	
 	use DateTime;
-	use DOMDocument;
 	use Exception;
 	
 	require "classes/Episode.php";
@@ -36,24 +35,17 @@
 	try {
 		$episodesHTML = $grabber->fetchVGOfeed();
 	} catch (Exception $e) {
-		secho ("Unexpected Error...");
+		secho("Unexpected Error...");
 		exit();
 	}
 	
 	secho("got episode list html");
 	
-	$episodesDOM = new DOMDocument();
-	@$episodesDOM->loadHTML($episodesHTML);
-	
-	$episodesXML = simplexml_import_dom($episodesDOM);
-	
-	$episodes = $episodesXML->xpath("//div[@class='libsyn-item']");
+	$episodes = $grabber->getEpisodeNodes($episodesHTML);
 	
 	$feed = file_get_contents("tmp/feed_dummy.xml");
 	
 	$items = "";
-	$files = [];
-	$fileHandlers = [];
 	
 	$i = 0;
 	
@@ -63,31 +55,22 @@
 		/**
 		 * load player
 		 */
-		$playerURL = "https:".(string)$episode->div[2]->iframe["src"];
+		$playerURL = $grabber->getPlayerUrl($episode);
 		
 		try {
 			$player = $grabber->fetchPlayer($playerURL);
 		} catch (Exception $e) {
-			secho ("Unexpected Error...");
+			secho("Unexpected Error...");
 			exit();
 		}
 		
-		$playerDOM = new DOMDocument();
-		@$playerDOM->loadHTML($player);
+		$duration = $grabber->getEpisodeDuration($player);
 		
-		$playerXML = simplexml_import_dom($playerDOM);
-		
-		$duration =	substr((string)$playerXML->xpath("//span[@class='static-duration']")[0],2);
-
 		/**
 		 * get direct link to mp3
 		 */
 		
-		// $re = '/"media_url":"([\w\d:\\\\\/\.\-]+)\?dest-id=([0-9]+)"/m';
-		$re = '/(traffic\.libsyn\.com[\\\\\/a-zA-Z0-9_\-.]+\.mp3)/m';
-		preg_match($re,$player, $matches);
-		$directLink = $matches[0];
-		$directLink = "https://".str_replace("\/","/",$directLink);
+		$directLink = $grabber->getDirectLink($player);
 		
 		/**
 		 * get pubDate
@@ -134,23 +117,7 @@
 		$i++;
 	}
 	
-	/**
-	 * clean up podcasts directory
-	 */
-	foreach (scandir("podcasts/") as $cachedFile) {
-		if ($cachedFile != "." && $cachedFile != "..") {
-			if (!in_array($cachedFile, $files)) {
-				secho("found $cachedFile which is an old episode. deleting.");
-				unlink("podcasts/$cachedFile");
-			}
-		}
-	}
-	
 	$feed = str_replace("{{{ITEMS}}}", $items, $feed);
 	$feed = str_replace("{{{FEED_LOCATION}}}", $fixed_feed_url, $feed);
 	file_put_contents("tmp/current_feed.xml", $feed);
 	secho("new feed created. closing");
-	
-	foreach ($fileHandlers as $fileHandler) {
-		fclose($fileHandler);
-	}
