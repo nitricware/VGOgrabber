@@ -63,4 +63,4 @@ Feel free to message me on the VGO Discord. I'm `vcr80`.
 
 - The code of `index.php` is ugly and should be split up into functions of `VGOGrabber` class.
 - No real error management
-- Game Store Guy and Community Show are not in the feed. I'm in contact with Michelle about that issue.
+- Any content that is not VGO but free (Game Store Guy, Community Show) will not show up in this feed. There is no feasible way to fix it. I talked to Michelle. Premium Previes that are directly connected to VGO (Micro VGO Premium Preview) will show up in the feed.
