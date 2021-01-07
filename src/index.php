@@ -12,20 +12,21 @@
 	/** @var string $cache_url */
 	/** @var string $fixed_feed_url */
 	require "settings.php";
-	require "classes/VGOGrabber.php";
+	require "classes/LibsynGrabber.php";
 	
-	$grabber = new VGOGrabber();
+	$grabber = new LibsynGrabber(SLUG);
 	
-	function secho(string $text) {
-		echo $text."<br />";
+	function secho (string $text) {
+		echo $text . "<br />";
 	}
 	
-	secho("VGO Grabber v1.0");
+	secho("VGO Grabber v1.1");
 	
 	try {
-		$grabber->libsynLogin($email, $password);
+		$grabber->libsynLogin(EMAIL, PASSWORD);
 	} catch (Exception $e) {
-		secho ("Unexpected Error...");
+		secho($e->getMessage());
+		exit();
 	}
 	
 	//TODO implement check for unsuccessful login
@@ -112,7 +113,7 @@
 			$feed = str_replace("{{{PUBDATE}}}", $episodeObject->pubDate, $feed);
 		}
 		
-		$items = $items."\n".$itemDummy;
+		$items = $items . "\n" . $itemDummy;
 		
 		$i++;
 	}
@@ -121,3 +122,4 @@
 	$feed = str_replace("{{{FEED_LOCATION}}}", $fixed_feed_url, $feed);
 	file_put_contents("tmp/current_feed.xml", $feed);
 	secho("new feed created. closing");
+	$grabber->cleanPodcastDirectory();

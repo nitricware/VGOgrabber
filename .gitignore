@@ -1,3 +1,4 @@
 src/tmp/current_feed.xml
 src/settings.php
 src/tmp/test.xml
+src/podcasts/*.mp3

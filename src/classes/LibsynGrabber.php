@@ -8,23 +8,26 @@
 	use SimpleXMLElement;
 	use DOMDocument;
 	
-	class VGOGrabber {
+	class LibsynGrabber {
 		/** @var \CurlHandle $curl */
 		private $curl;
 		private string $loginUrl = "https://my.libsyn.com/auth/login";
-		private string $feedUrl = "https://vgo.libsyn.com/podcast";
+		private string $feedUrlBase = "https://%s.libsyn.com/podcast";
+		private string $feedUrl = "";
 		
 		private array $fileHandlers = [];
 		/** @var string[] $files */
 		private array $files = [];
 		
-		public function __construct () {
+		public function __construct (string $slug) {
 			/*
 			 * Initialize CurlHandle
 			 */
 			$this->curl = curl_init();
 			curl_setopt($this->curl, CURLOPT_COOKIEJAR, '/tmp/cookies.txt');
 			curl_setopt($this->curl, CURLOPT_COOKIEFILE, '/tmp/cookies.txt');
+			
+			$this->feedUrl = sprintf($this->feedUrlBase, [$slug]);
 		}
 		
 		/**
@@ -34,15 +37,6 @@
 			curl_close($this->curl);
 			foreach ($this->fileHandlers as $fileHandler) {
 				fclose($fileHandler);
-			}
-			
-			foreach (scandir("podcasts/") as $cachedFile) {
-				if ($cachedFile != "." && $cachedFile != "..") {
-					if (!in_array($cachedFile, $this->files)) {
-						secho("found $cachedFile which is an old episode. deleting.");
-						unlink("podcasts/$cachedFile");
-					}
-				}
 			}
 		}
 		
@@ -55,7 +49,7 @@
 		 * @return string|void
 		 * @throws Exception
 		 */
-		private function makeCURLrequest (string $url, $post = false, bool $return = false, $toFile = false): string {
+		private function makeCURLrequest (string $url, $post = false, bool $return = false, $toFile = false) {
 			if (!$post) {
 				$returnTransfer = false;
 			} else {
@@ -74,7 +68,7 @@
 			curl_setopt($this->curl, CURLOPT_POST, $returnTransfer);
 			
 			if ($toFile) {
-				$this->files[] = $toFile.".mp3";
+				$this->files[] = $toFile . ".mp3";
 				if (!file_exists("podcasts/$toFile.mp3")) {
 					if ($this->fileHandlers[$toFile] = fopen("podcasts/$toFile.mp3", 'wb+')) {
 						curl_setopt($this->curl, CURLOPT_URL, $url);
@@ -103,7 +97,17 @@
 		 * @throws Exception
 		 */
 		public function libsynLogin (string $email, string $password): void {
-			$this->makeCURLrequest($this->loginUrl, ["email" => $email, "password" => $password]);
+			$login = $this->makeCURLrequest(
+				$this->loginUrl,
+				[
+					"email" => urlencode($email),
+					"password" => urlencode($password)
+				],
+				true);
+			
+			if (strpos($login, "Invalid e-mail address or password provided")) {
+				throw new Exception("Invalid e-mail address or password provided");
+			}
 		}
 		
 		/**
@@ -111,7 +115,7 @@
 		 * @throws Exception
 		 */
 		public function fetchVGOfeed (): string {
-			return $this->makeCURLrequest($this->feedUrl,);
+			return $this->makeCURLrequest($this->feedUrl);
 		}
 		
 		/**
@@ -144,8 +148,6 @@
 			@$dom->loadHTML($html);
 			
 			return simplexml_import_dom($dom);
-			
-			//$episodes = $episodesXML->xpath("//div[@class='libsyn-item']");
 		}
 		
 		/**
@@ -154,7 +156,7 @@
 		 *
 		 * @return SimpleXMLElement[]
 		 */
-		private function findNodesWithXPath (SimpleXMLElement $xml, string $query) {
+		private function findNodesWithXPath (SimpleXMLElement $xml, string $query): array {
 			return $xml->xpath($query);
 		}
 		
@@ -163,21 +165,36 @@
 		 *
 		 * @return SimpleXMLElement[]
 		 */
-		public function getEpisodeNodes (string $html) {
+		public function getEpisodeNodes (string $html): array {
 			$xml = $this->getSimpleXMLFromHTML($html);
 			return $this->findNodesWithXPath($xml, "//div[@class='libsyn-item']");
 		}
 		
+		/**
+		 * @param string $html
+		 *
+		 * @return false|string
+		 */
 		public function getEpisodeDuration (string $html) {
 			$xml = $this->getSimpleXMLFromHTML($html);
 			$xpath = $this->findNodesWithXPath($xml, "//span[@class='static-duration']");
 			return substr((string)$xpath[0], 2);
 		}
 		
+		/**
+		 * @param SimpleXMLElement $episode
+		 *
+		 * @return string
+		 */
 		public function getPlayerUrl (SimpleXMLElement $episode) {
 			return "https:" . (string)$episode->div[2]->iframe["src"];
 		}
 		
+		/**
+		 * @param string $html
+		 *
+		 * @return string
+		 */
 		public function getDirectLink (string $html) {
 			// $re = '/"media_url":"([\w\d:\\\\\/\.\-]+)\?dest-id=([0-9]+)"/m';
 			$re = '/(traffic\.libsyn\.com[\\\\\/a-zA-Z0-9_\-.]+\.mp3)/m';
@@ -187,13 +204,15 @@
 		}
 		
 		/**
-		 * prints given string, array, object
-		 *
-		 * @param mixed $log
+		 * Deletes episodes that are not in the feed anymore.
 		 */
-		public function log ($log): void {
-			echo "<pre>";
-			print_r($log);
-			echo "</pre>";
+		public function cleanPodcastDirectory () {
+			foreach (scandir("podcasts/") as $cachedFile) {
+				if ($cachedFile != "." && $cachedFile != "..") {
+					if (!in_array($cachedFile, $this->files)) {
+						unlink("podcasts/$cachedFile");
+					}
+				}
+			}
 		}
 	}
