@@ -27,7 +27,11 @@
 			curl_setopt($this->curl, CURLOPT_COOKIEJAR, '/tmp/cookies.txt');
 			curl_setopt($this->curl, CURLOPT_COOKIEFILE, '/tmp/cookies.txt');
 			
-			$this->feedUrl = sprintf($this->feedUrlBase, [$slug]);
+			$this->feedUrl = sprintf($this->feedUrlBase, $slug);
+			
+			if (!file_exists("podcasts/")) {
+				mkdir("podcasts/");
+			}
 		}
 		
 		/**
@@ -49,23 +53,24 @@
 		 * @return string|void
 		 * @throws Exception
 		 */
-		private function makeCURLrequest (string $url, $post = false, bool $return = false, $toFile = false) {
-			if (!$post) {
-				$returnTransfer = false;
-			} else {
-				$returnTransfer = true;
-				// TODO escape special characters
-				$postFields = "";
+		private function makeCURLrequest (string $url, $post = false, bool $return = true, $toFile = false) {
+			curl_setopt($this->curl, CURLOPT_URL, $url);
+			curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, $return);
+			curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
+			
+			if ($post) {
+				curl_setopt($this->curl, CURLOPT_POST, true);
+				$postFieldsArray = [];
 				foreach ($post as $key => $value) {
-					$post .= "$key=$value";
+					$postFieldsArray[] = "$key=$value";
 				}
 				
+				$postFields = implode("&", $postFieldsArray);
+				
 				curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postFields);
+			} else {
+				curl_setopt($this->curl, CURLOPT_POST, false);
 			}
-			
-			curl_setopt($this->curl, CURLOPT_URL, $url);
-			curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($this->curl, CURLOPT_POST, $returnTransfer);
 			
 			if ($toFile) {
 				$this->files[] = $toFile . ".mp3";
@@ -75,7 +80,6 @@
 						curl_setopt($this->curl, CURLOPT_NOBODY, 0);
 						curl_setopt($this->curl, CURLOPT_TIMEOUT, 300);
 						curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, 1);
-						curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
 						curl_setopt($this->curl, CURLOPT_FILE, $this->fileHandlers[$toFile]);
 					}
 				} else {
@@ -101,11 +105,11 @@
 				$this->loginUrl,
 				[
 					"email" => urlencode($email),
-					"password" => urlencode($password)
-				],
-				true);
+					"password" => urlencode($password),
+					"submit" => true
+				]);
 			
-			if (strpos($login, "Invalid e-mail address or password provided")) {
+			if (!strpos($login, "Active subscriptions")) {
 				throw new Exception("Invalid e-mail address or password provided");
 			}
 		}

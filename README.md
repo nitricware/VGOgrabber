@@ -27,7 +27,7 @@ $fixed_feed_url = "";
 
 /**
  * Your libsyn/VGO premium credentials.
- * Special characters must be manually escaped in this version.
+ * Special characters are escaped by the software automatically.
  */
 $email = "";
 $password = "";
@@ -58,9 +58,12 @@ Feel free to message me on the VGO Discord. I'm `vcr80`.
 
 * 1.0 - initial release
 * 1.0.1 - fixed an issue that prevented Apple Podcasts to fetch the feed of VGOGrabber and made Apple Podcasts use the default VGO URL resulting in only showing non-premium content. Apps like Overcast did not have that problem.
+* 1.1 - LibsynGrabber class implemented
+* 1.2 - updated README, bugfixes, verbose output
 
 ## Known Issues and Limitations
 
 - The code of `index.php` is ugly and should be split up into functions of `VGOGrabber` class.
-- No real error management
+- terrible UI
+- bad error management
 - Any content that is not VGO but free (Game Store Guy, Community Show) will not show up in this feed. There is no feasible way to fix it. I talked to Michelle. Premium Previes that are directly connected to VGO (Micro VGO Premium Preview) will show up in the feed.

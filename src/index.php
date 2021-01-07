@@ -4,11 +4,12 @@
 	use DateTime;
 	use Exception;
 	
+	ob_end_flush();
+	ob_implicit_flush(true);
+	
 	require "classes/Episode.php";
 	/** @var string $login_url */
 	/** @var string $feed_url */
-	/** @var string $email */
-	/** @var string $password */
 	/** @var string $cache_url */
 	/** @var string $fixed_feed_url */
 	require "settings.php";
@@ -16,11 +17,17 @@
 	
 	$grabber = new LibsynGrabber(SLUG);
 	
-	function secho (string $text) {
-		echo $text . "<br />";
+	/**
+	 * @param mixed $thing
+	 */
+	function secho ($thing) {
+		echo "<pre>";
+		print_r($thing);
+		echo "<br />";
+		echo "</pre>";
 	}
 	
-	secho("VGO Grabber v1.1");
+	secho("VGO Grabber v1.1.1");
 	
 	try {
 		$grabber->libsynLogin(EMAIL, PASSWORD);
@@ -51,7 +58,7 @@
 	$i = 0;
 	
 	foreach ($episodes as $episode) {
-		secho("Element $i in episodes array - string procedure");
+		secho("Element $i of " . count($episodes));
 		
 		/**
 		 * load player
@@ -100,13 +107,15 @@
 		$itemDummy = str_replace("{{{GUID}}}", $episodeObject->guid, $itemDummy);
 		$itemDummy = str_replace("{{{LINK}}}", $episodeObject->link, $itemDummy);
 		$itemDummy = str_replace("{{{DESCRIPTION}}}", $episodeObject->description, $itemDummy);
-		$itemDummy = str_replace("{{{DIRECT_LINK}}}", $cache_url.$episodeObject->guid.".mp3", $itemDummy);
+		$itemDummy = str_replace("{{{DIRECT_LINK}}}", $cache_url . $episodeObject->guid . ".mp3", $itemDummy);
 		$itemDummy = str_replace("{{{DURATION}}}", $episodeObject->duration, $itemDummy);
-		
+		secho(">>> $episodeObject->title");
 		try {
+			secho("Starting download");
 			$grabber->getPodcastFile($directLink, $episodeObject->guid);
+			secho("Download done");
 		} catch (Exception $e) {
-			secho("This episode was already downloaded. Skipping.");
+			secho("Exception: " . $e->getMessage());
 		}
 		
 		if ($i == 0) {
@@ -116,6 +125,7 @@
 		$items = $items . "\n" . $itemDummy;
 		
 		$i++;
+		secho("--------------------------------------------------------");
 	}
 	
 	$feed = str_replace("{{{ITEMS}}}", $items, $feed);
