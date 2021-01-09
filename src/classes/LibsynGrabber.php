@@ -12,8 +12,9 @@
 		/** @var \CurlHandle $curl */
 		private $curl;
 		private string $loginUrl = "https://my.libsyn.com/auth/login";
+		private string $logoutUrl = "https://my.libsyn.com/auth/logout";
 		private string $feedUrlBase = "https://%s.libsyn.com/podcast";
-		private string $feedUrl = "";
+		private string $feedUrl;
 		
 		private array $fileHandlers = [];
 		/** @var string[] $files */
@@ -36,8 +37,11 @@
 		
 		/**
 		 * Handles automatic clean-up
+		 *
+		 * @throws Exception
 		 */
 		public function __destruct () {
+			$this->libsynLogout();
 			curl_close($this->curl);
 			foreach ($this->fileHandlers as $fileHandler) {
 				fclose($fileHandler);
@@ -47,15 +51,14 @@
 		/**
 		 * @param string      $url
 		 * @param bool|array  $post
-		 * @param bool        $return
 		 * @param bool|string $toFile
 		 *
-		 * @return string|void
+		 * @return string
 		 * @throws Exception
 		 */
-		private function makeCURLrequest (string $url, $post = false, bool $return = true, $toFile = false) {
+		private function makeCURLrequest (string $url, $post = false, $toFile = false): string {
 			curl_setopt($this->curl, CURLOPT_URL, $url);
-			curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, $return);
+			curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
 			
 			if ($post) {
@@ -87,11 +90,7 @@
 				}
 			}
 			
-			if ($return) {
-				return curl_exec($this->curl);
-			} else {
-				curl_exec($this->curl);
-			}
+			return curl_exec($this->curl);
 		}
 		
 		/**
@@ -112,6 +111,13 @@
 			if (!strpos($login, "Active subscriptions")) {
 				throw new Exception("Invalid e-mail address or password provided");
 			}
+		}
+		
+		/**
+		 * @throws Exception
+		 */
+		private function libsynLogout (): void {
+			$this->makeCURLrequest($this->logoutUrl);
 		}
 		
 		/**
@@ -139,7 +145,7 @@
 		 * @throws Exception
 		 */
 		public function getPodcastFile (string $url, string $guid) {
-			$this->makeCURLrequest($url, false, false, $guid);
+			$this->makeCURLrequest($url, false, $guid);
 		}
 		
 		/**
@@ -190,7 +196,7 @@
 		 *
 		 * @return string
 		 */
-		public function getPlayerUrl (SimpleXMLElement $episode) {
+		public function getPlayerUrl (SimpleXMLElement $episode): string {
 			return "https:" . (string)$episode->div[2]->iframe["src"];
 		}
 		
@@ -199,7 +205,7 @@
 		 *
 		 * @return string
 		 */
-		public function getDirectLink (string $html) {
+		public function getDirectLink (string $html): string {
 			// $re = '/"media_url":"([\w\d:\\\\\/\.\-]+)\?dest-id=([0-9]+)"/m';
 			$re = '/(traffic\.libsyn\.com[\\\\\/a-zA-Z0-9_\-.]+\.mp3)/m';
 			preg_match($re, $html, $matches);

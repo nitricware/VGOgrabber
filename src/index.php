@@ -19,9 +19,16 @@
 	
 	/**
 	 * @param mixed $thing
+	 * @param bool  $verbose
 	 */
-	function secho ($thing) {
+	function secho ($thing, bool $verbose = false): void {
+		$bt = debug_backtrace();
+		$caller = array_shift($bt);
+		
 		echo "<pre>";
+		if ($verbose) {
+			echo $caller['file'] . " (" . $caller['line'] . ")\t\t";
+		}
 		print_r($thing);
 		echo "<br />";
 		echo "</pre>";
