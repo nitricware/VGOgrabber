@@ -118,6 +118,9 @@
 			secho("Exception: " . $e->getMessage());
 		}
 		
+		$episodeObject->size = filesize('podcasts/' . $episodeObject->guid . ".mp3");
+		$itemDummy = str_replace("{{{FILESIZE}}}", $episodeObject->size, $itemDummy);
+
 		if ($i == 0) {
 			$feed = str_replace("{{{PUBDATE}}}", $episodeObject->pubDate, $feed);
 		}

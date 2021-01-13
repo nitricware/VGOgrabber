@@ -12,6 +12,7 @@
 		public string $duration;
 		public string $guid;
 		public string $directLink;
+		public int $size;
 		
 		public function __construct (
 			string $title = "",
@@ -20,7 +21,8 @@
 			string $pubDate = "",
 			string $duration = "",
 			string $guid = "",
-			string $directLink = ""
+			string $directLink = "",
+			int $size = 0
 		) {
 			$this->title = $title;
 			$this->link = $link;
@@ -29,5 +31,6 @@
 			$this->duration = $duration;
 			$this->guid = $guid;
 			$this->directLink = $directLink;
+			$this->size = $size;
 		}
 	}
