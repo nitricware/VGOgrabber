@@ -6,7 +6,7 @@
             <itunes:image href="https://ssl-static.libsyn.com/p/assets/a/c/9/a/ac9a07211ef7a827/VGOlogoArt.jpg" />
             <description><![CDATA[<p>{{{DESCRIPTION}}}</p>]]></description>
             <content:encoded><![CDATA[<p>{{{DESCRIPTION}}}</p>]]></content:encoded>
-            <enclosure length="116273564" type="audio/mpeg" url="{{{DIRECT_LINK}}}" />
+            <enclosure length="{{{FILESIZE}}}" type="audio/mpeg" url="{{{DIRECT_LINK}}}" />
             <itunes:duration>{{{DURATION}}}</itunes:duration>
             <itunes:explicit>no</itunes:explicit>
             <itunes:keywords />
