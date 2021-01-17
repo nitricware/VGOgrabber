@@ -42,7 +42,6 @@
 		 */
 		public function __destruct () {
 			$this->libsynLogout();
-			secho($this->files);
 			$this->cleanPodcastDirectory();
 			curl_close($this->curl);
 			foreach ($this->fileHandlers as $fileHandler) {
