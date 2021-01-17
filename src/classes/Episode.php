@@ -4,30 +4,24 @@
 	namespace NitricWare;
 	
 	
+	use DateTime;
+	
 	class Episode {
-		public string $title;
-		public string $link;
-		public string $description;
-		public string $pubDate;
-		public string $duration;
 		public string $guid;
+		public int $fileSize = 0;
 		public string $directLink;
 		
 		public function __construct (
-			string $title = "",
-			string $link = "",
-			string $description = "",
-			string $pubDate = "",
-			string $duration = "",
-			string $guid = "",
-			string $directLink = ""
+			public string $title,
+			public string $link,
+			public string $description,
+			public DateTime $pubDate,
+			public string $duration,
+			public string $ext,
+			private string $podcastFilePath,
+			public string $downloadLink
 		) {
-			$this->title = $title;
-			$this->link = $link;
-			$this->description = $description;
-			$this->pubDate = $pubDate;
-			$this->duration = $duration;
-			$this->guid = $guid;
-			$this->directLink = $directLink;
+			$this->guid = sha1($this->pubDate->format("d-m-y h:i") . $this->title);
+			$this->directLink = $this->podcastFilePath . $this->guid . "." . $this->ext;
 		}
 	}

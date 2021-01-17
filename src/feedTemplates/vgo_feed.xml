@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:cc="http://web.resource.org/cc/"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <channel>
+        <atom:link href="{{{FEED_LOCATION}}}" rel="self" type="application/rss+xml"/>
+        <title>Video Game Outsiders</title>
+        <pubDate>{{{PUBDATE}}}</pubDate>
+        <lastBuildDate>{{{PUBDATE}}}</lastBuildDate>
+        <generator>Libsyn WebEngine 2.0</generator>
+        <link>http://videogameoutsiders.com</link>
+        <language>en</language>
+        <copyright><![CDATA[(c) 2005 JacobsenMadison INC]]></copyright>
+        <docs>http://videogameoutsiders.com</docs>
+        <managingEditor>contact@videogameoutsiders.com (contact@videogameoutsiders.com)</managingEditor>
+        <itunes:summary>
+            <![CDATA[VGO has been churning out stupidity and gaming since 2004, making it one of the longest running podcasts of all time. Hosts John “John’s Arcade” Jacobson, and comedy creator Michelle Madison, explore all things gaming from console to PC, with a healthy dose of random insanity in between. Live every Tuesday, VGO is home to a unique community who participates in the shows via listener voicemail (call 1-520-FEEL-VGO), the IRC chat room, and their often totally worthless tweets. NOTE: For older episodes and weekly bonus content, please download our app or visit our website VideoGameOutsiders.com]]></itunes:summary>
+        <image>
+            <url>https://ssl-static.libsyn.com/p/assets/a/c/9/a/ac9a07211ef7a827/VGOlogoArt.jpg</url>
+            <title>Video Game Outsiders</title>
+            <link><![CDATA[http://videogameoutsiders.com]]></link>
+        </image>
+        <itunes:author>John Jacobsen and Michelle Madison</itunes:author>
+        <itunes:keywords>628626,comedy,game,gamer,games,gaming,outsiders,pc,podcast,ps5,vgo,video,videogames,xbox
+        </itunes:keywords>
+        <itunes:category text="Leisure">
+            <itunes:category text="Video Games"/>
+        </itunes:category>
+        <itunes:category text="Leisure">
+            <itunes:category text="Games"/>
+        </itunes:category>
+        <itunes:category text="News">
+            <itunes:category text="Tech News"/>
+        </itunes:category>
+        <itunes:image href="https://ssl-static.libsyn.com/p/assets/a/c/9/a/ac9a07211ef7a827/VGOlogoArt.jpg"/>
+        <itunes:explicit>yes</itunes:explicit>
+        <itunes:owner>
+            <itunes:name><![CDATA[John Jacobsen and Michelle Madison]]></itunes:name>
+            <itunes:email>contact@videogameoutsiders.com</itunes:email>
+        </itunes:owner>
+        <description>
+            <![CDATA[VGO has been churning out stupidity and gaming since 2004, making it one of the longest running podcasts of all time. Hosts John “John’s Arcade” Jacobson, and comedy creator Michelle Madison, explore all things gaming from console to PC, with a healthy dose of random insanity in between. Live every Tuesday, VGO is home to a unique community who participates in the shows via listener voicemail (call 1-520-FEEL-VGO), the IRC chat room, and their often totally worthless tweets. NOTE: For older episodes and weekly bonus content, please download our app or visit our website VideoGameOutsiders.com]]></description>
+        <itunes:subtitle>
+            <![CDATA[A Video Game Podcast, Xbox One, Xbox, Nintendo, Switch, Wii U, PS4, Sony, Playstation, PC, Gaming, Video Game Outsiders]]></itunes:subtitle>
+        <itunes:type>episodic</itunes:type>
+        <!-- START CHANNEL EXTRA TAGS -->
+        <itunes:new-feed-url>{{{FEED_LOCATION}}}</itunes:new-feed-url>
+        <!-- CLOSE CHANNEL EXTRA TAGS -->
+        {{{LOOP ITEMS}}}
+        <item>
+            <title>{{{TITLE}}}</title>
+            <pubDate>{{{PUBDATE}}}</pubDate>
+            <guid isPermaLink="false"><![CDATA[{{{GUID}}}]]></guid>
+            <link><![CDATA[{{{LINK}}}]]></link>
+            <itunes:image href="https://ssl-static.libsyn.com/p/assets/a/c/9/a/ac9a07211ef7a827/VGOlogoArt.jpg"/>
+            <description><![CDATA[<p>{{{DESCRIPTION}}}</p>]]></description>
+            <content:encoded><![CDATA[<p>{{{DESCRIPTION}}}</p>]]></content:encoded>
+            <enclosure length="{{{FILESIZE}}}" type="audio/mpeg" url="{{{DIRECT_LINK}}}"/>
+            <itunes:duration>{{{DURATION}}}</itunes:duration>
+            <itunes:explicit>no</itunes:explicit>
+            <itunes:keywords/>
+            <itunes:subtitle><![CDATA[{{{DESCRIPTION}}}]]></itunes:subtitle>
+            <itunes:episodeType>full</itunes:episodeType>
+        </item>
+        {{{ENDLOOP ITEMS}}}
+    </channel>
+</rss>

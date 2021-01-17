@@ -4,23 +4,22 @@
 	namespace NitricWare;
 	
 	
+	use CurlHandle;
 	use Exception;
-	use SimpleXMLElement;
-	use DOMDocument;
 	
 	class LibsynGrabber {
-		/** @var \CurlHandle $curl */
+		/** @var CurlHandle $curl */
 		private $curl;
 		private string $loginUrl = "https://my.libsyn.com/auth/login";
 		private string $logoutUrl = "https://my.libsyn.com/auth/logout";
-		private string $feedUrlBase = "https://%s.libsyn.com/podcast";
-		private string $feedUrl;
 		
 		private array $fileHandlers = [];
 		/** @var string[] $files */
-		private array $files = [];
+		protected array $files = [];
 		
-		public function __construct (string $slug) {
+		public function __construct (
+			public string $slug = "",
+		) {
 			/*
 			 * Initialize CurlHandle
 			 */
@@ -28,10 +27,11 @@
 			curl_setopt($this->curl, CURLOPT_COOKIEJAR, '/tmp/cookies.txt');
 			curl_setopt($this->curl, CURLOPT_COOKIEFILE, '/tmp/cookies.txt');
 			
-			$this->feedUrl = sprintf($this->feedUrlBase, $slug);
-			
 			if (!file_exists("podcasts/")) {
 				mkdir("podcasts/");
+			}
+			if (!file_exists("exports/")) {
+				mkdir("exports/");
 			}
 		}
 		
@@ -42,6 +42,8 @@
 		 */
 		public function __destruct () {
 			$this->libsynLogout();
+			secho($this->files);
+			$this->cleanPodcastDirectory();
 			curl_close($this->curl);
 			foreach ($this->fileHandlers as $fileHandler) {
 				fclose($fileHandler);
@@ -56,7 +58,7 @@
 		 * @return string
 		 * @throws Exception
 		 */
-		private function makeCURLrequest (string $url, $post = false, $toFile = false): string {
+		protected function makeCURLrequest (string $url, $post = false, $toFile = false): string {
 			curl_setopt($this->curl, CURLOPT_URL, $url);
 			curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
@@ -76,17 +78,12 @@
 			}
 			
 			if ($toFile) {
-				$this->files[] = $toFile . ".mp3";
-				if (!file_exists("podcasts/$toFile.mp3")) {
-					if ($this->fileHandlers[$toFile] = fopen("podcasts/$toFile.mp3", 'wb+')) {
-						curl_setopt($this->curl, CURLOPT_URL, $url);
-						curl_setopt($this->curl, CURLOPT_NOBODY, 0);
-						curl_setopt($this->curl, CURLOPT_TIMEOUT, 300);
-						curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, 1);
-						curl_setopt($this->curl, CURLOPT_FILE, $this->fileHandlers[$toFile]);
-					}
-				} else {
-					throw new Exception("This file already exists.");
+				if ($this->fileHandlers[$toFile] = fopen("podcasts/$toFile.mp3", 'wb+')) {
+					curl_setopt($this->curl, CURLOPT_URL, $url);
+					curl_setopt($this->curl, CURLOPT_NOBODY, 0);
+					curl_setopt($this->curl, CURLOPT_TIMEOUT, 300);
+					curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, 1);
+					curl_setopt($this->curl, CURLOPT_FILE, $this->fileHandlers[$toFile]);
 				}
 			}
 			
@@ -121,99 +118,6 @@
 		}
 		
 		/**
-		 * @return string
-		 * @throws Exception
-		 */
-		public function fetchVGOfeed (): string {
-			return $this->makeCURLrequest($this->feedUrl);
-		}
-		
-		/**
-		 * @param string $playerUrl
-		 *
-		 * @return string
-		 * @throws Exception
-		 */
-		public function fetchPlayer (string $playerUrl): string {
-			return $this->makeCURLrequest($playerUrl);
-		}
-		
-		/**
-		 * @param string $url
-		 * @param string $guid
-		 *
-		 * @throws Exception
-		 */
-		public function getPodcastFile (string $url, string $guid) {
-			$this->makeCURLrequest($url, false, $guid);
-		}
-		
-		/**
-		 * @param string $html
-		 *
-		 * @return SimpleXMLElement
-		 */
-		private function getSimpleXMLFromHTML (string $html): SimpleXMLElement {
-			$dom = new DOMDocument();
-			@$dom->loadHTML($html);
-			
-			return simplexml_import_dom($dom);
-		}
-		
-		/**
-		 * @param SimpleXMLElement $xml
-		 * @param string           $query
-		 *
-		 * @return SimpleXMLElement[]
-		 */
-		private function findNodesWithXPath (SimpleXMLElement $xml, string $query): array {
-			return $xml->xpath($query);
-		}
-		
-		/**
-		 * @param string $html
-		 *
-		 * @return SimpleXMLElement[]
-		 */
-		public function getEpisodeNodes (string $html): array {
-			$xml = $this->getSimpleXMLFromHTML($html);
-			return $this->findNodesWithXPath($xml, "//div[@class='libsyn-item']");
-		}
-		
-		/**
-		 * @param string $html
-		 *
-		 * @return false|string
-		 */
-		public function getEpisodeDuration (string $html) {
-			$xml = $this->getSimpleXMLFromHTML($html);
-			$xpath = $this->findNodesWithXPath($xml, "//span[@class='static-duration']");
-			return substr((string)$xpath[0], 2);
-		}
-		
-		/**
-		 * @param SimpleXMLElement $episode
-		 *
-		 * @return string
-		 */
-		public function getPlayerUrl (SimpleXMLElement $episode): string {
-			return "https:" . (string)$episode->div[2]->iframe["src"];
-		}
-		
-		/**
-		 * @param string $html
-		 *
-		 * @return string
-		 */
-		public function getDirectLink (string $html): string {
-			// $re = '/"media_url":"([\w\d:\\\\\/\.\-]+)\?dest-id=([0-9]+)"/m';
-			$re = '/(traffic\.libsyn\.com[\\\\\/a-zA-Z0-9_\-.]+\.mp3)/m';
-			preg_match($re, $html, $matches);
-			$directLink = $matches[0];
-			return "https://" . str_replace("\/", "/", $directLink);
-		}
-		
-		/**
 		 * Deletes episodes that are not in the feed anymore.
 		 */
 		public function cleanPodcastDirectory () {
@@ -224,5 +128,15 @@
 					}
 				}
 			}
+		}
+		
+		/**
+		 * @param string $url
+		 * @param string $guid
+		 *
+		 * @throws Exception
+		 */
+		public function getPodcastFile (string $url, string $guid) {
+			$this->makeCURLrequest($url, false, $guid);
 		}
 	}

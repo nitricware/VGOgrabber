@@ -1,6 +1,8 @@
 <?php
-	const SLUG = "vgo";
+	const SLUG = "";
 	const EMAIL = "";
 	const PASSWORD = "";
-	$cache_url = "";
-	$fixed_feed_url = "";
+	const SHOW_ID = 0;
+	const FEED_LOCATION = "";
+	const EPISODE_LIMIT = 10;
+	const PODCAST_FILE_PATH = "";
