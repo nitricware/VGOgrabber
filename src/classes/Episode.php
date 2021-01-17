@@ -10,6 +10,7 @@
 		public string $guid;
 		public int $fileSize = 0;
 		public string $directLink;
+		public int $size;
 		
 		public function __construct (
 			public string $title,
