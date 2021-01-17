@@ -12,6 +12,7 @@
   "require": {
     "ext-curl": "*",
     "ext-dom": "*",
-    "ext-simplexml": "*"
+    "ext-simplexml": "*",
+    "php": "^8.0"
   }
 }
