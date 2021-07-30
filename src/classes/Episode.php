@@ -22,7 +22,7 @@
 			private string $podcastFilePath,
 			public string $downloadLink
 		) {
-			$this->guid = sha1($this->pubDate->format("d-m-y h:i") . $this->title);
+			$this->guid = sha1($this->pubDate->format("d-m-y") . $this->title);
 			$this->directLink = $this->podcastFilePath . $this->guid . "." . $this->ext;
 		}
 	}
