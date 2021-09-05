@@ -8,6 +8,11 @@
 	use Exception;
 	use stdClass;
 	
+	/**
+	 * Class LibsynJSONGrabber
+	 *
+	 * @package NitricWare
+	 */
 	class LibsynJSONGrabber extends LibsynGrabber {
 		private string $baseURL = "https://html5-player.libsyn.com/embed/list/id/%d/size/%d/sort_by_field/%s/sort_by_direction/%s";
 		private string $jsonURL;
@@ -17,6 +22,15 @@
 		/** @var Episode[] $episodes */
 		private array $episodes;
 		
+		/**
+		 * LibsynJSONGrabber constructor.
+		 *
+		 * @param string                       $podcastFileLocation
+		 * @param int                          $showID
+		 * @param int                          $limit
+		 * @param LibsynSortByField|string     $sortByField
+		 * @param LibsynSortByDirection|string $sortByDirection
+		 */
 		public function __construct (
 			private string $podcastFileLocation,
 			private int $showID = 0,
@@ -29,6 +43,9 @@
 			$this->jsonURL = sprintf($this->baseURL, $this->showID, $this->limit, $this->sortByField, $this->sortByDirection);
 		}
 		
+		/**
+		 * @throws Exception
+		 */
 		public function __destruct () {
 			parent::__destruct();
 		}
@@ -75,41 +92,6 @@
 		}
 		
 		/**
-		 * @param LibsynSortByField|string $sortByField
-		 */
-		public function setSortByField (string|LibsynSortByField $sortByField): void {
-			$this->sortByField = $sortByField;
-		}
-		
-		/**
-		 * @param LibsynSortByDirection|string $sortByDirection
-		 */
-		public function setSortByDirection (string|LibsynSortByDirection $sortByDirection): void {
-			$this->sortByDirection = $sortByDirection;
-		}
-		
-		/**
-		 * @return LibsynSortByField|string
-		 */
-		public function getSortByField (): string|LibsynSortByField {
-			return $this->sortByField;
-		}
-		
-		/**
-		 * @return LibsynSortByDirection|string
-		 */
-		public function getSortByDirection (): string|LibsynSortByDirection {
-			return $this->sortByDirection;
-		}
-		
-		/**
-		 * @return string
-		 */
-		public function getJsonURL (): string {
-			return $this->jsonURL;
-		}
-		
-		/**
 		 * @return Episode[]
 		 */
 		public function getEpisodes (): array {
@@ -118,11 +100,23 @@
 		
 	}
 	
+	/**
+	 * Class LibsynSortByField
+	 * ENUM-equivalent
+	 *
+	 * @package NitricWare
+	 */
 	abstract class LibsynSortByField {
 		const RELEASE_DATE = "release_date";
 	}
 	
-	class LibsynSortByDirection {
+	/**
+	 * Class LibsynSortByDirection
+	 * ENUM-equivalent
+	 *
+	 * @package NitricWare
+	 */
+	abstract class LibsynSortByDirection {
 		const ASC = "asc";
 		const DESC = "desc";
 	}
