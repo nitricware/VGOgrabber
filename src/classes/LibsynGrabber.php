@@ -8,8 +8,7 @@
 	use Exception;
 	
 	class LibsynGrabber {
-		/** @var CurlHandle $curl */
-		private $curl;
+		private false|CurlHandle $curl;
 		private string $loginUrl = "https://my.libsyn.com/auth/login";
 		private string $logoutUrl = "https://my.libsyn.com/auth/logout";
 		
@@ -119,7 +118,7 @@
 		/**
 		 * Deletes episodes that are not in the feed anymore.
 		 */
-		public function cleanPodcastDirectory () {
+		public function cleanPodcastDirectory (): void {
 			foreach (scandir("podcasts/") as $cachedFile) {
 				if ($cachedFile != "." && $cachedFile != "..") {
 					if (!in_array($cachedFile, $this->files)) {
@@ -135,7 +134,7 @@
 		 *
 		 * @throws Exception
 		 */
-		public function getPodcastFile (string $url, string $guid) {
+		public function getPodcastFile (string $url, string $guid): void {
 			$this->makeCURLrequest($url, false, $guid);
 		}
 	}

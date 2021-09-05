@@ -59,6 +59,13 @@
 		}
 		
 		/**
+		 * @return string
+		 */
+		public function getJSONURL (): string {
+			return $this->jsonURL;
+		}
+		
+		/**
 		 * @throws Exception
 		 */
 		public function getEpisodesFromJSON () {

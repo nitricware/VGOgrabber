@@ -24,12 +24,24 @@
 		print_r($thing);
 		echo "<br />";
 		echo "</pre>";
+		@sflush();
+	}
+	
+	/**
+	 * Sends the buffer content to the browser immediately.
+	 */
+	function sflush(): void {
+		flush();
+		ob_flush();
 	}
 	
 	$grabber = new LibsynJSONGrabber(
 		podcastFileLocation: PODCAST_FILE_PATH,
 		showID: SHOW_ID,
 		limit: EPISODE_LIMIT);
+	
+	secho("Welcome to LibsynGrabber.");
+	secho("Grabbing feed. To change settings, alter settings.php");
 	
 	try {
 		$grabber->libsynLogin(EMAIL, PASSWORD);
@@ -42,6 +54,7 @@
 	
 	try {
 		$grabber->getJSONFeed();
+		// secho($grabber->getJSONURL());
 	} catch (Exception $e) {
 		secho("ERROR" . $e->getMessage());
 		exit();
