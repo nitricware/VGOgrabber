@@ -67,7 +67,7 @@
 					title: $episode->item_title,
 					link: $episode->permalink_url,
 					description: $episode->item_subtitle,
-					pubDate: new DateTime($episode->release_date),
+					pubDate: DateTime::createFromFormat('M/d/Y', $episode->release_date),
 					duration: $episode->duration,
 					ext: $episode->ext,
 					podcastFilePath: $this->podcastFileLocation,
