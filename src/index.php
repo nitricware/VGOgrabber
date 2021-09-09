@@ -84,6 +84,5 @@
 		dummyFeedFilePath: "feedTemplates/vgo_feed.xml",
 		feedLocation: FEED_LOCATION
 	);
-
 	
 	secho("Feed created.");

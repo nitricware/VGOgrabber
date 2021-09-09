@@ -1,5 +1,5 @@
 {
-  "name": "NitricWare/VGOGrabber",
+  "name": "nitricware/vgograbber",
   "description": "displays VGO premium feed",
   "minimum-stability": "stable",
   "license": "BSD",
@@ -13,6 +13,6 @@
     "ext-curl": "*",
     "ext-dom": "*",
     "ext-simplexml": "*",
-    "php": "^8.0"
+    "php": "^8.1"
   }
 }

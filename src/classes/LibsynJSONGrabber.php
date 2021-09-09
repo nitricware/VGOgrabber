@@ -113,8 +113,8 @@
 	 *
 	 * @package NitricWare
 	 */
-	abstract class LibsynSortByField {
-		const RELEASE_DATE = "release_date";
+	enum LibsynSortByField: string {
+		case RELEASE_DATE = "release_date";
 	}
 	
 	/**
@@ -123,7 +123,7 @@
 	 *
 	 * @package NitricWare
 	 */
-	abstract class LibsynSortByDirection {
-		const ASC = "asc";
-		const DESC = "desc";
+	enum LibsynSortByDirection: string {
+		case ASC = "asc";
+		case DESC = "desc";
 	}
