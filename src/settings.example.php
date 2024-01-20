@@ -1,5 +1,4 @@
 <?php
-	const SLUG = "";
 	const EMAIL = "";
 	const PASSWORD = "";
 	const SHOW_ID = 0;

@@ -8,6 +8,8 @@
 	require "classes/LibsynGrabber.php";
 	require "classes/LibsynJSONGrabber.php";
 	require "classes/LibsynRSSCreator.php";
+
+    const BASE_DIR = __DIR__;
 	
 	/**
 	 * @param mixed $thing
@@ -41,6 +43,7 @@
 		limit: EPISODE_LIMIT);
 	
 	secho("Welcome to LibsynGrabber.");
+    secho("by Kurt Frey aka NitricWare");
 	secho("Grabbing feed. To change settings, alter settings.php");
 	
 	try {

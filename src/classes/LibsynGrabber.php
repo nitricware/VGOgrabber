@@ -119,10 +119,10 @@
 		 * Deletes episodes that are not in the feed anymore.
 		 */
 		public function cleanPodcastDirectory (): void {
-			foreach (scandir("podcasts/") as $cachedFile) {
+			foreach (scandir(BASE_DIR."/podcasts/") as $cachedFile) {
 				if ($cachedFile != "." && $cachedFile != "..") {
 					if (!in_array($cachedFile, $this->files)) {
-						unlink("podcasts/$cachedFile");
+						unlink(BASE_DIR."/podcasts/$cachedFile");
 					}
 				}
 			}
