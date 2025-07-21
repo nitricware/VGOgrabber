@@ -1,8 +1,6 @@
-src/tmp/current_feed.xml
 src/settings.php
-src/tmp/test.xml
 src/podcasts/*.mp3
-src/tmp/*
 src/exports/*
 src/composer.lock
 src/vendor
+.idea

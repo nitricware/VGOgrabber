@@ -42,7 +42,7 @@
 		}
 		
 		private function fillEpisodeDummy (Episode $episode): string {
-			$dummyCopy = str_replace("{{{TITLE}}}", $episode->title, $this->episodeDummy);
+			$dummyCopy = str_replace("{{{TITLE}}}", htmlspecialchars($episode->title), $this->episodeDummy);
 			$dummyCopy = str_replace("{{{PUBDATE}}}", $episode->pubDate->format("D, j M Y h:i:s +0000"), $dummyCopy);
 			$dummyCopy = str_replace("{{{GUID}}}", $episode->guid, $dummyCopy);
 			$dummyCopy = str_replace("{{{DESCRIPTION}}}", $episode->description, $dummyCopy);
@@ -63,7 +63,7 @@
 		
 		private function save (): void {
 			$info = pathinfo($this->dummyFeedFilePath);
-			file_put_contents("exports/" . $info["basename"], $this->finalFeed);
+			file_put_contents(BASE_DIR."/exports/" . $info["basename"], $this->finalFeed);
 		}
 		
 		/**
