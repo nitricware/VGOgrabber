@@ -1,3 +1,5 @@
+*With VGO phasing out libsyn.com and moving to supercast.com, this repository is now archived.*
+
 # VGOgrabber
 
 Downloads - if premium credentials are provided - any number of premium episodes from the VGO podcast and offers a new RSS feed.
